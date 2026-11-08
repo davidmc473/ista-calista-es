@@ -49,12 +49,14 @@
         "data": {
           "update_interval_hours": "Intervalo de actualización",
           "import_statistics": "Importar el histórico diario en las estadísticas",
-          "history_days": "Histórico inicial"
+          "history_days": "Histórico inicial",
+          "stale_days": "Días sin lectura para avisar"
         },
         "data_description": {
           "update_interval_hours": "Horas entre dos lecturas del portal (1–24). ista publica las lecturas de radio una vez al día, con unos días de retraso.",
           "import_statistics": "Añade cada lectura diaria a las estadísticas a largo plazo con su fecha real, para que el consumo aparezca en el día correcto y los contadores de agua se puedan usar en el panel de Energía.",
-          "history_days": "Días de histórico que se importan la primera vez (0–1095)."
+          "history_days": "Días de histórico que se importan la primera vez (0–1095).",
+          "stale_days": "Un equipo se considera sin datos cuando su última lectura es más antigua (2–60). ista publica las lecturas con unos 3 días de retraso y a veces faltan días."
         }
       }
     }
@@ -101,6 +103,49 @@
     }
   },
   "entity": {
+    "binary_sensor": {
+      "stale": {
+        "name": "Sin lecturas recientes",
+        "state_attributes": {
+          "last_reading": {
+            "name": "Última lectura"
+          },
+          "days_without_reading": {
+            "name": "Días sin lectura"
+          },
+          "threshold": {
+            "name": "Umbral"
+          }
+        }
+      }
+    },
+    "event": {
+      "new_bill": {
+        "name": "Nuevo recibo",
+        "state_attributes": {
+          "event_type": {
+            "state": {
+              "new_bill": "Nuevo recibo"
+            }
+          },
+          "date": {
+            "name": "Fecha"
+          },
+          "kind": {
+            "name": "Tipo normalizado"
+          },
+          "type": {
+            "name": "Tipo"
+          },
+          "amount": {
+            "name": "Importe"
+          },
+          "currency": {
+            "name": "Moneda"
+          }
+        }
+      }
+    },
     "sensor": {
       "reading": {
         "name": "Lectura"
@@ -181,6 +226,20 @@
     },
     "update_failed": {
       "message": "Error leyendo el portal de ista: {error}"
+    }
+  },
+  "issues": {
+    "portal_changed": {
+      "title": "El portal de ista ha cambiado",
+      "description": "La integración no ha podido interpretar el portal Calista de ista para {account}:\n\n`{error}`\n\nSus entidades seguirán no disponibles hasta que el portal responda como se espera. Comprueba si hay una versión nueva de la integración en HACS o [avísalo]({url})."
+    },
+    "action_required": {
+      "title": "ista necesita que completes una acción en su web",
+      "description": "Para seguir leyendo {account}, entra en [oficina.ista.es]({url}) y completa lo que pida el portal (cambiar la contraseña, aceptar las condiciones…). Después vuelve a autenticar la integración desde **Ajustes → Dispositivos y servicios**."
+    },
+    "stale_meters": {
+      "title": "Equipos de ista sin lecturas recientes",
+      "description": "Estos equipos de {account} llevan más de {days} días sin lectura: **{meters}**.\n\nSuele ser un problema de batería o de radio del equipo. Si continúa, contacta con ista. Este aviso desaparece solo cuando vuelvan a llegar lecturas."
     }
   }
 }

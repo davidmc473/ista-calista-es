@@ -21,6 +21,7 @@ from custom_components.ista_calista_es.api import (
 from custom_components.ista_calista_es.const import (
     CONF_HISTORY_DAYS,
     CONF_IMPORT_STATISTICS,
+    CONF_STALE_DAYS,
     CONF_UPDATE_INTERVAL,
     DOMAIN,
 )
@@ -133,11 +134,17 @@ async def test_options(hass: HomeAssistant, config_entry: MockConfigEntry) -> No
     assert result["step_id"] == "init"
     result = await hass.config_entries.options.async_configure(
         result["flow_id"],
-        {CONF_UPDATE_INTERVAL: 12.0, CONF_IMPORT_STATISTICS: False, CONF_HISTORY_DAYS: 30.0},
+        {
+            CONF_UPDATE_INTERVAL: 12.0,
+            CONF_IMPORT_STATISTICS: False,
+            CONF_HISTORY_DAYS: 30.0,
+            CONF_STALE_DAYS: 15.0,
+        },
     )
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert config_entry.options == {
         CONF_UPDATE_INTERVAL: 12,
         CONF_IMPORT_STATISTICS: False,
         CONF_HISTORY_DAYS: 30,
+        CONF_STALE_DAYS: 15,
     }

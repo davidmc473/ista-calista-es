@@ -23,6 +23,7 @@ from custom_components.ista_calista_es.api.parser import (
     login_form_action,
     normalize_unit,
     parse_bills,
+    parse_bills_csv,
     parse_date,
     parse_header,
     parse_location,
@@ -31,7 +32,7 @@ from custom_components.ista_calista_es.api.parser import (
 )
 from custom_components.ista_calista_es.api.redact import REDACTED, anonymized_data
 
-from .conftest import fixture_doc
+from .conftest import fixture_bytes, fixture_doc
 
 ADDRESS = "CL-Calle FALSA 1 2 B MADRID (Madrid)"
 DWELLING_ID = "AbonadoTest0000000000A"
@@ -233,6 +234,36 @@ def test_bills() -> None:
     assert latest[MeterKind.HEAT_COST_ALLOCATOR].date == date(2026, 5, 31)
     assert latest[MeterKind.HOT_WATER].amount == 0.0
     assert parse_bills(fixture_doc("radio.html")) == []
+
+
+def test_bills_csv() -> None:
+    from custom_components.ista_calista_es.api.html import decode_html
+
+    bills = parse_bills_csv(decode_html(fixture_bytes("bills.csv")))
+    assert len(bills) == 34
+    assert bills[0].date == date(2026, 5, 31)
+    assert bills[0].type_label == "Radio Distribuidor de Costes de Calefacción"
+    assert bills[0].kind is MeterKind.HEAT_COST_ALLOCATOR
+    assert bills[0].amount == 17.11
+    assert bills[-1].date == date(2023, 3, 31)
+    heating = [b for b in bills if b.kind is MeterKind.HEAT_COST_ALLOCATOR]
+    assert round(sum(b.amount for b in heating), 2) == 337.83
+    assert {b.kind for b in bills} == {MeterKind.HEAT_COST_ALLOCATOR, MeterKind.HOT_WATER}
+
+
+def test_bills_csv_edge_cases() -> None:
+    # BOM, CRLF, filas vacías e importe con punto de miles
+    text = '﻿Fecha lectura,Tipo equipo,Importe\r\n01/02/2026,Agua fría,"1.234,50"\r\n\r\n,,\r\n'
+    bills = parse_bills_csv(text)
+    assert len(bills) == 1
+    assert (bills[0].date, bills[0].kind, bills[0].amount) == (
+        date(2026, 2, 1),
+        MeterKind.COLD_WATER,
+        1234.5,
+    )
+    assert parse_bills_csv("") == []
+    with pytest.raises(ParseError):
+        parse_bills_csv("a,b\n1,2")
 
 
 # --- modelos y anonimización --------------------------------------------------------

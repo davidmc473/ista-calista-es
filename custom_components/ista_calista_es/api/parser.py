@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import csv
 from dataclasses import dataclass, field
 from datetime import date, datetime
+import io
 import re
 import unicodedata
 
@@ -300,3 +302,36 @@ def parse_bills(doc: Element) -> list[Bill]:
             )
         return bills
     return []
+
+
+def parse_bills_csv(text: str) -> list[Bill]:
+    """Exportación CSV de «Mis recibos» (todo el historial; spec 004).
+
+    ``Fecha lectura,Tipo equipo,Importe`` con el importe entre comillas y coma decimal.
+    """
+    rows = [row for row in csv.reader(io.StringIO(text.lstrip("\ufeff"))) if any(row)]
+    if not rows:
+        return []
+    names = [fold(name) for name in rows[0]]
+    date_col = next((i for i, n in enumerate(names) if n.startswith("fecha")), None)
+    type_col = next((i for i, n in enumerate(names) if n.startswith("tipo")), None)
+    amount_col = _header_index(names, "importe")
+    if date_col is None or type_col is None or amount_col is None:
+        raise ParseError("El CSV de recibos no tiene las columnas esperadas")
+    bills: list[Bill] = []
+    for row in rows[1:]:
+        if len(row) <= max(date_col, type_col, amount_col):
+            continue
+        amount = parse_number(row[amount_col])
+        if amount is None or not row[date_col].strip():
+            continue
+        type_label = normalize_space(row[type_col])
+        bills.append(
+            Bill(
+                date=parse_date(row[date_col]),
+                type_label=type_label,
+                kind=classify(type_label),
+                amount=amount,
+            )
+        )
+    return bills

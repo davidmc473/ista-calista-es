@@ -113,7 +113,7 @@ publique con días de retraso, y poder usar el agua en el panel de Energía.
 - «Mis consumos» (lecturas facturadas) y equipos sin radio (lectura manual).
 - Descargar los PDF de los recibos.
 - «Dar mi lectura», alertas, simulador y cualquier escritura (constitución II).
-- Estadísticas de coste a partir de los recibos.
+- Estadísticas de coste a partir de los recibos (hecho en la spec 004).
 
 ## 6. Preguntas abiertas / riesgos
 

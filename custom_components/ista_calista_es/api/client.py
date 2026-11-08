@@ -25,13 +25,14 @@ from .exceptions import (
     SessionExpired,
 )
 from .html import Element, decode_html, parse_html
-from .models import CalistaData, Dwelling
+from .models import Bill, CalistaData, Dwelling
 from .parser import (
     RadioPage,
     is_portal_page,
     login_error_message,
     login_form_action,
     parse_bills,
+    parse_bills_csv,
     parse_header,
     parse_radio_page,
 )
@@ -50,6 +51,12 @@ DEFAULT_PORTAL_URL: Final = "https://oficina.ista.es"
 PATH_RADIO: Final = "/GesCon/GestionFincas.do"
 PATH_RADIO_DEFAULT: Final = "/GesCon/GestionFincas.do?metodo=preCargaLecturasRadio"
 PATH_BILLS: Final = "/GesCon/GestionFacturacionBuscar.do?metodo=buscarRecibos"
+#: exportación CSV (displaytag) de la lista de recibos mostrada en la sesión: todo el
+#: historial en una sola petición (spec 004)
+PATH_BILLS_CSV: Final = (
+    "/GesCon/GestionFacturacion.do?d-148657-e=1&metodo=listadoRecibos"
+    "&metodo=buscarRecibos&6578706f7274=1"
+)
 PATH_OFFICE: Final = "/GesCon/GestionOficinaVirtual.do"
 PATH_LOGOUT: Final = "/GesCon/GestionOficinaVirtual.do?metodo=logOutAbonado"
 
@@ -163,6 +170,28 @@ class CalistaClient:
             raise ParseError(f"Respuesta inesperada en {url.path}")
         return doc
 
+    async def _portal_export(self, path: str) -> str:
+        """Exportación de texto (CSV) autenticada. Sesión no válida → ``SessionExpired``."""
+        url = URL(f"{self._portal}{path}", encoded=True)
+        status, _, _, body = await self._request("GET", url)
+        if status in _REDIRECT_CODES or status in (401, 500):
+            raise SessionExpired(f"HTTP {status} en la exportación {url.path}")
+        if status != 200:
+            raise CannotConnect(f"HTTP {status} en la exportación {url.path}")
+        text = decode_html(body)
+        if "<html" in text[:1000].lower():
+            raise ParseError(f"La exportación {url.path} no es CSV")
+        return text
+
+    async def _async_read_bills(self, fallback: list[Bill]) -> list[Bill]:
+        """Historial completo de recibos (CSV); si no se puede, la primera página."""
+        try:
+            bills = parse_bills_csv(await self._portal_export(PATH_BILLS_CSV))
+        except ParseError as err:
+            _LOGGER.debug("Sin exportación de recibos (%s); se usa la primera página", err)
+            return fallback
+        return bills or fallback
+
     # --- sesión -------------------------------------------------------------------
 
     async def async_login(self) -> Element:
@@ -237,13 +266,15 @@ class CalistaClient:
                 radio = await self._async_read_radio(
                     await self._portal_page(PATH_RADIO_DEFAULT), history_start
                 )
+                # la exportación usa la lista de recibos de la página de aterrizaje
+                bills = await self._async_read_bills(parse_bills(landing))
                 data.dwellings.append(
                     Dwelling(
                         id=header.active_id or radio.header.active_id,
                         number=radio.header.number or header.number,
                         address=radio.header.address or header.address,
                         meters=radio.meters,
-                        bills=parse_bills(landing),
+                        bills=bills,
                     )
                 )
                 data.window_start, data.window_end = radio.window_start, radio.window_end
@@ -257,7 +288,9 @@ class CalistaClient:
                     await self._portal_page(switch_url, data={"metodo": "preCargaLecturasRadio"}),
                     history_start,
                 )
-                bills = parse_bills(await self._portal_page(PATH_BILLS))
+                bills = await self._async_read_bills(
+                    parse_bills(await self._portal_page(PATH_BILLS))
+                )
                 data.dwellings.append(
                     Dwelling(
                         id=dwelling_id,

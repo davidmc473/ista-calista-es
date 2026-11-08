@@ -12,10 +12,11 @@ import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.ista_calista_es.api import CalistaData, Dwelling
-from custom_components.ista_calista_es.api.parser import parse_bills, parse_radio_page
+from custom_components.ista_calista_es.api.html import decode_html
+from custom_components.ista_calista_es.api.parser import parse_bills_csv, parse_radio_page
 from custom_components.ista_calista_es.const import DOMAIN
 
-from ..conftest import fixture_doc
+from ..conftest import fixture_bytes, fixture_doc
 
 USERNAME = "abonado@example.com"
 ENTRY_DATA = {CONF_USERNAME: USERNAME, CONF_PASSWORD: "s3cret"}
@@ -43,7 +44,7 @@ def build_data(page_name: str) -> CalistaData:
                 number=NUMBER,
                 address="CL-Calle FALSA 1 2 B MADRID (Madrid)",
                 meters=page.meters,
-                bills=parse_bills(fixture_doc("landing.html")),
+                bills=parse_bills_csv(decode_html(fixture_bytes("bills.csv"))),
             )
         ],
         window_start=page.window_start,

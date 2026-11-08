@@ -13,6 +13,7 @@ from __future__ import annotations
 from collections.abc import Iterable
 from datetime import date, datetime, time, timedelta
 import logging
+import re
 from typing import Any
 from zoneinfo import ZoneInfo
 
@@ -26,7 +27,15 @@ from homeassistant.core import HomeAssistant
 from homeassistant.util import dt as dt_util
 from homeassistant.util.unit_conversion import EnergyConverter, VolumeConverter
 
-from .api import CalistaData, Meter, MeterKind, consumption_delta, default_window_start
+from .api import (
+    Bill,
+    CalistaData,
+    Dwelling,
+    Meter,
+    MeterKind,
+    consumption_delta,
+    default_window_start,
+)
 from .const import DOMAIN, MAX_HISTORY_DAYS, PORTAL_TIMEZONE
 
 _LOGGER = logging.getLogger(__name__)
@@ -160,3 +169,91 @@ async def async_import_meter(hass: HomeAssistant, meter: Meter) -> int:
 async def async_import_statistics(hass: HomeAssistant, data: CalistaData) -> None:
     for meter in data.meters:
         await async_import_meter(hass, meter)
+
+
+# --- coste de los recibos (spec 004) ------------------------------------------------
+
+_COST_NAMES = {
+    MeterKind.HEAT_COST_ALLOCATOR: "calefacción",
+    MeterKind.HOT_WATER: "agua caliente",
+    MeterKind.COLD_WATER: "agua fría",
+    MeterKind.WATER: "agua",
+    MeterKind.HEAT: "energía",
+}
+
+
+def cost_statistic_id(dwelling_key: str, kind: MeterKind) -> str:
+    slug = re.sub(r"[^a-z0-9_]", "_", dwelling_key.lower())
+    return f"{DOMAIN}:cost_{slug}_{kind.value}"
+
+
+def cost_statistic_name(dwelling: Dwelling, kind: MeterKind, *, several: bool) -> str:
+    label = next((b.type_label for b in dwelling.bills if b.kind is kind), "otros")
+    name = f"ista · Coste {_COST_NAMES.get(kind, label.lower())}"
+    return f"{name} ({dwelling.number or dwelling.key})" if several else name
+
+
+def cost_rows(bills: Iterable[Bill]) -> list[StatisticData]:
+    """Una fila por día de recibo (importes del mismo día sumados) con el coste acumulado."""
+    per_start: dict[datetime, float] = {}
+    for bill in bills:
+        start = statistic_start(bill.date)
+        per_start[start] = per_start.get(start, 0.0) + bill.amount
+    total = 0.0
+    rows: list[StatisticData] = []
+    for start in sorted(per_start):
+        total = round(total + per_start[start], 2)
+        rows.append(StatisticData(start=start, state=round(per_start[start], 2), sum=total))
+    return rows
+
+
+def _cost_metadata(stat_id: str, name: str) -> StatisticMetaData:
+    metadata: dict[str, Any] = {
+        "has_sum": True,
+        "name": name,
+        "source": DOMAIN,
+        "statistic_id": stat_id,
+        "unit_of_measurement": "EUR",
+    }
+    fields = StatisticMetaData.__annotations__
+    if "mean_type" in fields and StatisticMeanType is not None:
+        metadata["mean_type"] = StatisticMeanType.NONE
+    else:  # pragma: no cover - HA antiguo
+        metadata["has_mean"] = False
+    if "unit_class" in fields:
+        metadata["unit_class"] = None
+    return metadata  # type: ignore[return-value]
+
+
+async def async_import_costs(hass: HomeAssistant, data: CalistaData) -> None:
+    """Estadística de coste acumulado por vivienda y tipo de recibo.
+
+    Si la última fila importada sigue coincidiendo con la serie, solo se añaden las filas
+    nuevas; si no (recibo corregido o con fecha anterior), se reimporta la serie entera.
+    """
+    several = len(data.dwellings) > 1
+    for dwelling in data.dwellings:
+        kinds = sorted({bill.kind for bill in dwelling.bills})
+        for kind in kinds:
+            series = cost_rows(bill for bill in dwelling.bills if bill.kind is kind)
+            stat_id = cost_statistic_id(dwelling.key, kind)
+            last = await _async_last_row(hass, stat_id)
+            rows = series
+            if last is not None:
+                match = next(
+                    (row for row in series if row["start"].timestamp() == last["start"]), None
+                )
+                if match is not None and abs(match["sum"] - (last.get("sum") or 0.0)) < 0.005:
+                    rows = [row for row in series if row["start"].timestamp() > last["start"]]
+            if rows:
+                _LOGGER.debug("Importando %d filas de coste en %s", len(rows), stat_id)
+                async_add_external_statistics(
+                    hass,
+                    _cost_metadata(stat_id, cost_statistic_name(dwelling, kind, several=several)),
+                    rows,
+                )
+
+
+def meter_label(meter: Meter) -> str:
+    """Nombre legible de un equipo cuando aún no está en el registro de dispositivos."""
+    return statistic_name(meter).removeprefix("ista · ")

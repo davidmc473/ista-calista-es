@@ -24,13 +24,17 @@ from .api import (
 from .const import (
     CONF_HISTORY_DAYS,
     CONF_IMPORT_STATISTICS,
+    CONF_STALE_DAYS,
     CONF_UPDATE_INTERVAL,
     DEFAULT_HISTORY_DAYS,
     DEFAULT_IMPORT_STATISTICS,
+    DEFAULT_STALE_DAYS,
     DEFAULT_UPDATE_INTERVAL,
     DOMAIN,
     MAX_HISTORY_DAYS,
+    MAX_STALE_DAYS,
     MAX_UPDATE_INTERVAL,
+    MIN_STALE_DAYS,
     MIN_UPDATE_INTERVAL,
     PORTAL_URL,
 )
@@ -171,6 +175,7 @@ class CalistaOptionsFlow(OptionsFlow):
         if user_input is not None:
             user_input[CONF_UPDATE_INTERVAL] = int(user_input[CONF_UPDATE_INTERVAL])
             user_input[CONF_HISTORY_DAYS] = int(user_input[CONF_HISTORY_DAYS])
+            user_input[CONF_STALE_DAYS] = int(user_input[CONF_STALE_DAYS])
             return self.async_create_entry(data=user_input)
         options = self.config_entry.options
         schema = vol.Schema(
@@ -198,6 +203,18 @@ class CalistaOptionsFlow(OptionsFlow):
                     selector.NumberSelectorConfig(
                         min=0,
                         max=MAX_HISTORY_DAYS,
+                        step=1,
+                        unit_of_measurement="d",
+                        mode=selector.NumberSelectorMode.BOX,
+                    )
+                ),
+                vol.Required(
+                    CONF_STALE_DAYS,
+                    default=options.get(CONF_STALE_DAYS, DEFAULT_STALE_DAYS),
+                ): selector.NumberSelector(
+                    selector.NumberSelectorConfig(
+                        min=MIN_STALE_DAYS,
+                        max=MAX_STALE_DAYS,
                         step=1,
                         unit_of_measurement="d",
                         mode=selector.NumberSelectorMode.BOX,

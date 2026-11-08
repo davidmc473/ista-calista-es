@@ -109,7 +109,21 @@ aterrizaje del login).
 </table>
 ```
 
-Importe con coma decimal (y punto de miles si lo hubiera). 15 filas por página.
+Importe con coma decimal (y punto de miles si lo hubiera). 15 filas por página
+(`GestionFacturacion.do?d-148657-p=N&metodo=listadoRecibos&metodo=buscarRecibos`).
+
+### 5.1 Exportación CSV (spec 004)
+
+`GET /GesCon/GestionFacturacion.do?d-148657-e=1&metodo=listadoRecibos&metodo=buscarRecibos&6578706f7274=1`
+→ `text/csv` UTF-8 con **todos** los recibos de la lista que la sesión mostró por última vez
+(la página de aterrizaje ya la muestra), de más reciente a más antiguo:
+
+```
+Fecha lectura,Tipo equipo,Importe
+31/05/2026,Radio Distribuidor de Costes de Calefacción,"17,11"
+```
+
+`d-148657-e=2` es Excel y `=5` PDF; `=3` (XML) da `500`. Sin sesión: `302` al host interno.
 
 ## 6. Cambio de abonado (vivienda)
 

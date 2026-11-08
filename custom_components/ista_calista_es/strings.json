@@ -49,12 +49,14 @@
         "data": {
           "update_interval_hours": "Update interval",
           "import_statistics": "Import daily history into statistics",
-          "history_days": "Initial history"
+          "history_days": "Initial history",
+          "stale_days": "Days without readings to warn"
         },
         "data_description": {
           "update_interval_hours": "Hours between two reads of the portal (1–24). ista publishes radio readings once a day, a few days late.",
           "import_statistics": "Adds each daily reading to the long-term statistics on its real date, so the consumption appears on the right day and the water meters can be used in the Energy dashboard.",
-          "history_days": "Days of history to import the first time (0–1095)."
+          "history_days": "Days of history to import the first time (0–1095).",
+          "stale_days": "A meter is reported as having no data when its last reading is older than this (2–60). ista publishes readings about 3 days late and some days are missing."
         }
       }
     }
@@ -101,6 +103,49 @@
     }
   },
   "entity": {
+    "binary_sensor": {
+      "stale": {
+        "name": "No recent readings",
+        "state_attributes": {
+          "last_reading": {
+            "name": "Last reading"
+          },
+          "days_without_reading": {
+            "name": "Days without readings"
+          },
+          "threshold": {
+            "name": "Threshold"
+          }
+        }
+      }
+    },
+    "event": {
+      "new_bill": {
+        "name": "New bill",
+        "state_attributes": {
+          "event_type": {
+            "state": {
+              "new_bill": "New bill"
+            }
+          },
+          "date": {
+            "name": "Date"
+          },
+          "kind": {
+            "name": "Kind"
+          },
+          "type": {
+            "name": "Type"
+          },
+          "amount": {
+            "name": "Amount"
+          },
+          "currency": {
+            "name": "Currency"
+          }
+        }
+      }
+    },
     "sensor": {
       "reading": {
         "name": "Reading"
@@ -181,6 +226,20 @@
     },
     "update_failed": {
       "message": "Error reading the ista portal: {error}"
+    }
+  },
+  "issues": {
+    "portal_changed": {
+      "title": "The ista portal has changed",
+      "description": "The integration could not interpret the ista Calista portal for {account}:\n\n`{error}`\n\nIts entities stay unavailable until the portal answers as expected. Check whether there is a new version of the integration in HACS or [report it]({url})."
+    },
+    "action_required": {
+      "title": "ista needs you to complete an action on its website",
+      "description": "To keep reading {account}, log in at [oficina.ista.es]({url}) and complete what the portal asks for (change the password, accept the terms…). Then re-authenticate the integration from **Settings → Devices & services**."
+    },
+    "stale_meters": {
+      "title": "ista meters without recent readings",
+      "description": "These meters of {account} have not had a reading for more than {days} days: **{meters}**.\n\nIt is usually a battery or radio problem in the meter. If it persists, contact ista. This warning disappears by itself when readings arrive again."
     }
   }
 }

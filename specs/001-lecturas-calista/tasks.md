@@ -48,5 +48,11 @@ Leyenda: `[x]` hecho · `[ ]` pendiente · `[~]` requiere validación del usuari
 - [~] T046 Añadirlo como repositorio personalizado en el HACS del usuario e instalarlo
 
 ## Backlog (specs futuras)
-- [ ] Spec 002: «Mis consumos» (lecturas facturadas) para equipos sin radio
-- [ ] Spec 003: estadísticas de coste a partir de los recibos
+- [x] Spec 002: avisos en «Reparaciones» (`specs/002-avisos-reparaciones/`)
+- [x] Spec 003: icono y logo de ista (`specs/003-icono-ista/`)
+- [x] Spec 004: coste de los recibos en estadísticas y en el panel de Energía (`specs/004-coste-energia/`)
+- [x] Spec 005: evento «Nuevo recibo» (`specs/005-evento-recibo/`)
+- [x] Spec 006: aviso de equipo sin datos (`specs/006-equipo-sin-datos/`)
+- [ ] Spec 007: «Mis consumos» (lecturas facturadas e incidencias) para equipos sin radio
+- [ ] Spec 008: total de la vivienda, comparativa con la temporada anterior y reparto por estancia
+- [ ] Spec 009: releases y catálogo por defecto de HACS

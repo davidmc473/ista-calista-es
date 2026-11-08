@@ -9,7 +9,6 @@ import json
 from homeassistant.components.recorder import get_instance
 from homeassistant.components.recorder.statistics import (
     get_metadata,
-    statistics_during_period,
 )
 from homeassistant.components.sensor import SensorDeviceClass, SensorStateClass
 from homeassistant.config_entries import SOURCE_REAUTH, ConfigEntryState
@@ -25,9 +24,6 @@ from homeassistant.helpers import device_registry as dr, entity_registry as er
 from homeassistant.util import dt as dt_util
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
-from pytest_homeassistant_custom_component.components.recorder.common import (
-    async_wait_recording_done,
-)
 
 from custom_components.ista_calista_es import async_remove_config_entry_device
 from custom_components.ista_calista_es.api import (
@@ -48,48 +44,14 @@ from custom_components.ista_calista_es.diagnostics import (
 )
 from custom_components.ista_calista_es.statistics import statistic_id, statistic_start
 
+from .common import (
+    device as _device,
+    entity_id as _entity_id,
+    meter_stats as _stats,
+    refresh as _refresh,
+    setup as _setup,
+)
 from .conftest import BATH, BEDROOM, HALL, NUMBER, WATER, FakeClient
-
-
-def _device(hass: HomeAssistant, entry: MockConfigEntry, ident: str) -> dr.DeviceEntry:
-    devices = dr.async_get(hass).async_get_devices(
-        identifiers={(DOMAIN, ident)}, config_entry_id=entry.entry_id
-    )
-    assert len(devices) == 1, f"dispositivo {ident}: {devices}"
-    return devices[0]
-
-
-def _entity_id(hass: HomeAssistant, unique_id: str) -> str:
-    entity_id = er.async_get(hass).async_get_entity_id("sensor", DOMAIN, unique_id)
-    assert entity_id, f"sensor {unique_id} no registrado"
-    return entity_id
-
-
-async def _setup(hass: HomeAssistant, entry: MockConfigEntry) -> None:
-    assert await hass.config_entries.async_setup(entry.entry_id)
-    await hass.async_block_till_done()
-    await async_wait_recording_done(hass)
-
-
-async def _refresh(hass: HomeAssistant, entry: MockConfigEntry) -> None:
-    await entry.runtime_data.async_refresh()
-    await hass.async_block_till_done()
-    await async_wait_recording_done(hass)
-
-
-async def _stats(hass: HomeAssistant, serial: str) -> list[dict]:
-    stat_id = statistic_id(serial)
-    result = await get_instance(hass).async_add_executor_job(
-        statistics_during_period,
-        hass,
-        dt_util.utc_from_timestamp(0),
-        None,
-        {stat_id},
-        "hour",
-        None,
-        {"state", "sum"},
-    )
-    return result.get(stat_id, [])
 
 
 async def test_setup_unload(

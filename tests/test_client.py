@@ -54,13 +54,25 @@ async def test_full_cycle(fake_portal, session) -> None:
     assert dwelling.id == "AbonadoTest0000000000A"
     assert len(dwelling.meters) == 9
     assert {b.kind for b in dwelling.bills} == {MeterKind.HOT_WATER, MeterKind.HEAT_COST_ALLOCATOR}
-    # solo la página de lecturas (los recibos vienen en la de aterrizaje) y el logout
+    # historial completo de recibos desde la exportación CSV (spec 004)
+    assert len(dwelling.bills) == 34
+    assert dwelling.bills[-1].date == date(2023, 3, 31)
+    # lecturas, exportación de recibos (de la lista de aterrizaje) y logout
     paths = [path for _, path, _ in state.requests]
     assert paths == [
         "/GesCon/GestionOficinaVirtual.do?metodo=loginAbonado&ticket=t-2",
         "/GesCon/GestionFincas.do?metodo=preCargaLecturasRadio",
+        "/GesCon/GestionFacturacion.do?d-148657-e=1&metodo=listadoRecibos"
+        "&metodo=buscarRecibos&6578706f7274=1",
         "/GesCon/GestionOficinaVirtual.do?metodo=logOutAbonado",
     ]
+
+
+async def test_bills_export_broken_falls_back_to_first_page(fake_portal, session) -> None:
+    state, _ = fake_portal
+    state.export_broken = True
+    data = await _client(session, state).async_get_data()
+    assert len(data.dwellings[0].bills) == 15
 
 
 async def test_history_range(fake_portal, session) -> None:
@@ -145,7 +157,7 @@ async def test_two_dwellings(fake_portal, session) -> None:
     assert [d.id for d in data.dwellings] == ["AbonadoTest0000000000A", SECOND_ID]
     assert [d.number for d in data.dwellings] == ["12345678", "87654321"]
     assert data.dwellings[1].address == "CL-Calle OTRA 9 1 A MADRID (Madrid)"
-    assert all(len(d.meters) == 9 and d.bills for d in data.dwellings)
+    assert all(len(d.meters) == 9 and len(d.bills) == 34 for d in data.dwellings)
     switches = [path for method, path, _ in state.requests if "cambioAbonado" in path]
     assert len(switches) == 2
     assert f"param={SECOND_ID}" in switches[1]

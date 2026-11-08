@@ -48,6 +48,10 @@ class FakePortalState:
     #: (método, ruta con query, formulario) de las peticiones a GesCon
     requests: list[tuple[str, str, dict[str, str]]] = field(default_factory=list)
     active_dwelling: str = "AbonadoTest0000000000A"
+    #: sesiones que han mostrado «Mis recibos» (la exportación usa esa lista)
+    bills_listed: set[str] = field(default_factory=set)
+    #: la exportación CSV devuelve una página HTML (formato inesperado)
+    export_broken: bool = False
 
     @property
     def auth_url(self) -> str:
@@ -141,6 +145,7 @@ def build_app(state: FakePortalState) -> web.Application:
         if (error := authenticated(request, data_page=metodo != "loginAbonado")) is not None:
             return error
         if metodo == "loginAbonado":
+            state.bills_listed.add(request.cookies["JSESSIONID"])
             return _html(_with_second_dwelling(fixture_bytes("landing.html"), state))
         if metodo == "cambioAbonado":
             assert request.method == "POST"
@@ -169,7 +174,22 @@ def build_app(state: FakePortalState) -> web.Application:
         state.requests.append((request.method, request.path_qs, {}))
         if (error := authenticated(request)) is not None:
             return error
+        state.bills_listed.add(request.cookies["JSESSIONID"])
         return _html(_with_second_dwelling(fixture_bytes("bills.html"), state))
+
+    async def bills_export(request: web.Request) -> web.Response:
+        state.requests.append((request.method, request.path_qs, {}))
+        if (error := authenticated(request)) is not None:
+            return error
+        assert request.query["d-148657-e"] == "1"
+        assert request.query["6578706f7274"] == "1"
+        if request.cookies["JSESSIONID"] not in state.bills_listed:
+            return web.Response(status=500, text="Error")
+        if state.export_broken:
+            return _html(b"<html><body>Error</body></html>")
+        return web.Response(
+            body=fixture_bytes("bills.csv"), content_type="text/csv", charset="UTF-8"
+        )
 
     app = web.Application()
     app.router.add_get(AUTH_PATH, auth)
@@ -179,4 +199,5 @@ def build_app(state: FakePortalState) -> web.Application:
     app.router.add_route("*", "/GesCon/GestionOficinaVirtual.do", office)
     app.router.add_route("*", "/GesCon/GestionFincas.do", fincas)
     app.router.add_get("/GesCon/GestionFacturacionBuscar.do", bills)
+    app.router.add_get("/GesCon/GestionFacturacion.do", bills_export)
     return app

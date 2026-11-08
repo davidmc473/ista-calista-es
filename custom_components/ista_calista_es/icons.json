@@ -1,5 +1,18 @@
 {
   "entity": {
+    "binary_sensor": {
+      "stale": {
+        "default": "mdi:access-point-check",
+        "state": {
+          "on": "mdi:access-point-off"
+        }
+      }
+    },
+    "event": {
+      "new_bill": {
+        "default": "mdi:receipt-text-plus"
+      }
+    },
     "sensor": {
       "last_reading_date": {
         "default": "mdi:calendar-check"
