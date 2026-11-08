@@ -1,6 +1,10 @@
 {
   "domain": "ista_calista_es",
   "name": "ista Calista (España)",
+  "categories": [
+    "energy.meters_monitoring",
+    "water.meters_leak_detection"
+  ],
   "codeowners": [
     "@davidmc473"
   ],

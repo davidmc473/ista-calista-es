@@ -43,7 +43,9 @@ Leyenda: `[x]` hecho · `[ ]` pendiente · `[~]` requiere validación del usuari
       + 57 de protocolo/parser
 - [~] T043 Cuenta con varias viviendas (US5)
 - [~] T044 Otros tipos de equipo (agua fría, energía): fixtures de usuarios
-- [ ] T045 Publicar en GitHub y añadir como repositorio personalizado en HACS
+- [x] T045 Publicado en https://github.com/davidmc473/ista-calista-es (público, topics HACS);
+      CI verde: hassfest, validación HACS, ruff y tests
+- [~] T046 Añadirlo como repositorio personalizado en el HACS del usuario e instalarlo
 
 ## Backlog (specs futuras)
 - [ ] Spec 002: «Mis consumos» (lecturas facturadas) para equipos sin radio
