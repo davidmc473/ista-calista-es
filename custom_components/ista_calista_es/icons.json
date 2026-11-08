@@ -1,0 +1,27 @@
+{
+  "entity": {
+    "sensor": {
+      "last_reading_date": {
+        "default": "mdi:calendar-check"
+      },
+      "last_bill_heat_cost_allocator": {
+        "default": "mdi:receipt-text"
+      },
+      "last_bill_hot_water": {
+        "default": "mdi:receipt-text"
+      },
+      "last_bill_cold_water": {
+        "default": "mdi:receipt-text"
+      },
+      "last_bill_water": {
+        "default": "mdi:receipt-text"
+      },
+      "last_bill_heat": {
+        "default": "mdi:receipt-text"
+      },
+      "last_bill_unknown": {
+        "default": "mdi:receipt-text"
+      }
+    }
+  }
+}

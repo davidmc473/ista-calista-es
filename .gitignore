@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+# Capturas en vivo del portal: contienen datos personales (e-mail, dirección, nº abonado…)
+dumps/
+captures/
+*.local.env
+.env
+# Home Assistant de pruebas
+.ha-config/

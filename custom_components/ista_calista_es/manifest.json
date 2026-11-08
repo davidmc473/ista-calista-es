@@ -1,0 +1,17 @@
+{
+  "domain": "ista_calista_es",
+  "name": "ista Calista (España)",
+  "codeowners": [
+    "@davidmc473"
+  ],
+  "config_flow": true,
+  "dependencies": [
+    "recorder"
+  ],
+  "documentation": "https://github.com/davidmc473/ista-calista-es",
+  "integration_type": "hub",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/davidmc473/ista-calista-es/issues",
+  "requirements": [],
+  "version": "0.1.0"
+}

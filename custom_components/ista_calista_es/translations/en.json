@@ -1,0 +1,186 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "ista Calista (Spain)",
+        "description": "Enter the e-mail and password you use in the ista tenant portal ({url}).",
+        "data": {
+          "username": "E-mail",
+          "password": "Password"
+        },
+        "data_description": {
+          "username": "E-mail of your ista Calista tenant account.",
+          "password": "Password of your ista Calista account."
+        }
+      },
+      "reauth_confirm": {
+        "title": "Re-authenticate ista Calista",
+        "description": "ista rejected the stored password for {username}. Enter the current one.",
+        "data": {
+          "password": "Password"
+        }
+      },
+      "reconfigure": {
+        "title": "Reconfigure ista Calista",
+        "data": {
+          "username": "E-mail",
+          "password": "Password"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Incorrect e-mail or password.",
+      "action_required": "The ista portal is asking for an action (change the password, accept the terms…). Log in at oficina.ista.es, complete it and try again.",
+      "cannot_connect": "Cannot connect to the ista portal.",
+      "unsupported": "The ista portal answered in an unexpected format.",
+      "unknown": "Unexpected error."
+    },
+    "abort": {
+      "already_configured": "This account is already configured.",
+      "reauth_successful": "Re-authentication was successful.",
+      "reconfigure_successful": "Reconfiguration was successful.",
+      "wrong_account": "Use the same account. To add another account, add the integration again."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "ista Calista options",
+        "data": {
+          "update_interval_hours": "Update interval",
+          "import_statistics": "Import daily history into statistics",
+          "history_days": "Initial history"
+        },
+        "data_description": {
+          "update_interval_hours": "Hours between two reads of the portal (1–24). ista publishes radio readings once a day, a few days late.",
+          "import_statistics": "Adds each daily reading to the long-term statistics on its real date, so the consumption appears on the right day and the water meters can be used in the Energy dashboard.",
+          "history_days": "Days of history to import the first time (0–1095)."
+        }
+      }
+    }
+  },
+  "device": {
+    "dwelling": {
+      "name": "Dwelling {number}"
+    },
+    "heat_cost_allocator": {
+      "name": "Heat cost allocator"
+    },
+    "heat_cost_allocator_location": {
+      "name": "Heat cost allocator {location}"
+    },
+    "hot_water": {
+      "name": "Hot water meter"
+    },
+    "hot_water_location": {
+      "name": "Hot water meter {location}"
+    },
+    "cold_water": {
+      "name": "Cold water meter"
+    },
+    "cold_water_location": {
+      "name": "Cold water meter {location}"
+    },
+    "water": {
+      "name": "Water meter"
+    },
+    "water_location": {
+      "name": "Water meter {location}"
+    },
+    "heat": {
+      "name": "Energy meter"
+    },
+    "heat_location": {
+      "name": "Energy meter {location}"
+    },
+    "unknown": {
+      "name": "{type}"
+    },
+    "unknown_location": {
+      "name": "{type} {location}"
+    }
+  },
+  "entity": {
+    "sensor": {
+      "reading": {
+        "name": "Reading"
+      },
+      "last_consumption": {
+        "name": "Last day consumption",
+        "state_attributes": {
+          "from": {
+            "name": "From"
+          },
+          "to": {
+            "name": "To"
+          }
+        }
+      },
+      "last_reading_date": {
+        "name": "Last reading date"
+      },
+      "last_bill_heat_cost_allocator": {
+        "name": "Last heating bill",
+        "state_attributes": {
+          "date": {
+            "name": "Date"
+          }
+        }
+      },
+      "last_bill_hot_water": {
+        "name": "Last hot water bill",
+        "state_attributes": {
+          "date": {
+            "name": "Date"
+          }
+        }
+      },
+      "last_bill_cold_water": {
+        "name": "Last cold water bill",
+        "state_attributes": {
+          "date": {
+            "name": "Date"
+          }
+        }
+      },
+      "last_bill_water": {
+        "name": "Last water bill",
+        "state_attributes": {
+          "date": {
+            "name": "Date"
+          }
+        }
+      },
+      "last_bill_heat": {
+        "name": "Last energy bill",
+        "state_attributes": {
+          "date": {
+            "name": "Date"
+          }
+        }
+      },
+      "last_bill_unknown": {
+        "name": "Last other bill",
+        "state_attributes": {
+          "date": {
+            "name": "Date"
+          },
+          "type": {
+            "name": "Type"
+          }
+        }
+      }
+    }
+  },
+  "exceptions": {
+    "invalid_auth": {
+      "message": "ista rejected the credentials."
+    },
+    "action_required": {
+      "message": "The ista portal is asking for an action before logging in. Log in at oficina.ista.es and complete it."
+    },
+    "update_failed": {
+      "message": "Error reading the ista portal: {error}"
+    }
+  }
+}

@@ -1,0 +1,14 @@
+# Home Assistant de desarrollo con la integración montada en caliente.
+#   docker compose -f docker-compose.dev.yml up -d   → http://localhost:8124
+services:
+  homeassistant:
+    image: ghcr.io/home-assistant/home-assistant:stable
+    container_name: ha-ista-dev
+    ports:
+      - "8124:8123"
+    environment:
+      TZ: Europe/Madrid
+    volumes:
+      - ./.ha-config:/config
+      - ./custom_components/ista_calista_es:/config/custom_components/ista_calista_es:ro
+    restart: unless-stopped

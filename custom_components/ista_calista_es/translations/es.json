@@ -1,0 +1,186 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "ista Calista (España)",
+        "description": "Introduce el e-mail y la contraseña que usas en la oficina virtual de abonados de ista ({url}).",
+        "data": {
+          "username": "E-mail",
+          "password": "Contraseña"
+        },
+        "data_description": {
+          "username": "E-mail de tu cuenta de abonado de ista Calista.",
+          "password": "Contraseña de tu cuenta de ista Calista."
+        }
+      },
+      "reauth_confirm": {
+        "title": "Volver a autenticar ista Calista",
+        "description": "ista ha rechazado la contraseña guardada de {username}. Introduce la actual.",
+        "data": {
+          "password": "Contraseña"
+        }
+      },
+      "reconfigure": {
+        "title": "Reconfigurar ista Calista",
+        "data": {
+          "username": "E-mail",
+          "password": "Contraseña"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "E-mail o contraseña incorrectos.",
+      "action_required": "El portal de ista pide una acción (cambiar la contraseña, aceptar las condiciones…). Entra en oficina.ista.es, complétala y vuelve a intentarlo.",
+      "cannot_connect": "No se puede conectar con el portal de ista.",
+      "unsupported": "El portal de ista ha respondido con un formato inesperado.",
+      "unknown": "Error inesperado."
+    },
+    "abort": {
+      "already_configured": "Esta cuenta ya está configurada.",
+      "reauth_successful": "Reautenticación correcta.",
+      "reconfigure_successful": "Reconfiguración correcta.",
+      "wrong_account": "Usa la misma cuenta. Para añadir otra cuenta, añade la integración de nuevo."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Opciones de ista Calista",
+        "data": {
+          "update_interval_hours": "Intervalo de actualización",
+          "import_statistics": "Importar el histórico diario en las estadísticas",
+          "history_days": "Histórico inicial"
+        },
+        "data_description": {
+          "update_interval_hours": "Horas entre dos lecturas del portal (1–24). ista publica las lecturas de radio una vez al día, con unos días de retraso.",
+          "import_statistics": "Añade cada lectura diaria a las estadísticas a largo plazo con su fecha real, para que el consumo aparezca en el día correcto y los contadores de agua se puedan usar en el panel de Energía.",
+          "history_days": "Días de histórico que se importan la primera vez (0–1095)."
+        }
+      }
+    }
+  },
+  "device": {
+    "dwelling": {
+      "name": "Vivienda {number}"
+    },
+    "heat_cost_allocator": {
+      "name": "Repartidor"
+    },
+    "heat_cost_allocator_location": {
+      "name": "Repartidor {location}"
+    },
+    "hot_water": {
+      "name": "Agua caliente"
+    },
+    "hot_water_location": {
+      "name": "Agua caliente {location}"
+    },
+    "cold_water": {
+      "name": "Agua fría"
+    },
+    "cold_water_location": {
+      "name": "Agua fría {location}"
+    },
+    "water": {
+      "name": "Contador de agua"
+    },
+    "water_location": {
+      "name": "Contador de agua {location}"
+    },
+    "heat": {
+      "name": "Contador de energía"
+    },
+    "heat_location": {
+      "name": "Contador de energía {location}"
+    },
+    "unknown": {
+      "name": "{type}"
+    },
+    "unknown_location": {
+      "name": "{type} {location}"
+    }
+  },
+  "entity": {
+    "sensor": {
+      "reading": {
+        "name": "Lectura"
+      },
+      "last_consumption": {
+        "name": "Consumo del último día",
+        "state_attributes": {
+          "from": {
+            "name": "Desde"
+          },
+          "to": {
+            "name": "Hasta"
+          }
+        }
+      },
+      "last_reading_date": {
+        "name": "Fecha de la última lectura"
+      },
+      "last_bill_heat_cost_allocator": {
+        "name": "Último recibo de calefacción",
+        "state_attributes": {
+          "date": {
+            "name": "Fecha"
+          }
+        }
+      },
+      "last_bill_hot_water": {
+        "name": "Último recibo de agua caliente",
+        "state_attributes": {
+          "date": {
+            "name": "Fecha"
+          }
+        }
+      },
+      "last_bill_cold_water": {
+        "name": "Último recibo de agua fría",
+        "state_attributes": {
+          "date": {
+            "name": "Fecha"
+          }
+        }
+      },
+      "last_bill_water": {
+        "name": "Último recibo de agua",
+        "state_attributes": {
+          "date": {
+            "name": "Fecha"
+          }
+        }
+      },
+      "last_bill_heat": {
+        "name": "Último recibo de energía",
+        "state_attributes": {
+          "date": {
+            "name": "Fecha"
+          }
+        }
+      },
+      "last_bill_unknown": {
+        "name": "Último recibo (otros)",
+        "state_attributes": {
+          "date": {
+            "name": "Fecha"
+          },
+          "type": {
+            "name": "Tipo"
+          }
+        }
+      }
+    }
+  },
+  "exceptions": {
+    "invalid_auth": {
+      "message": "ista ha rechazado las credenciales."
+    },
+    "action_required": {
+      "message": "El portal de ista pide una acción antes de entrar. Entra en oficina.ista.es y complétala."
+    },
+    "update_failed": {
+      "message": "Error leyendo el portal de ista: {error}"
+    }
+  }
+}

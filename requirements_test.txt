@@ -1,0 +1,6 @@
+# Tests de la capa api/ (sin Home Assistant; funcionan también en Windows)
+pytest>=8
+pytest-asyncio>=0.24
+aiohttp>=3.10
+# Tests de la integración (Linux/WSL/Docker; no compila en Windows)
+# pytest-homeassistant-custom-component
